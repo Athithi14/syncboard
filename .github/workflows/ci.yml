@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Lint & test (Python ${{ matrix.python }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+          cache-dependency-path: server/requirements-dev.txt
+      - name: Install dependencies
+        run: pip install -r server/requirements-dev.txt
+      - name: Lint with ruff
+        run: ruff check .
+      - name: Run tests
+        working-directory: server
+        run: pytest -v
+
+  frontend:
+    name: Check client JavaScript
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax check
+        run: node --check client/app.js
+
+  docker:
+    name: Docker build & smoke test
+    needs: [test, frontend]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: docker build -t syncboard:ci .
+      - name: Start container and hit /health
+        run: |
+          docker run -d --name sb -p 8000:8000 syncboard:ci
+          for i in $(seq 1 15); do
+            curl -fs http://localhost:8000/health && exit 0
+            sleep 2
+          done
+          docker logs sb
+          exit 1

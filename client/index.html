@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SyncBoard</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="bar">
+    <strong class="brand">SyncBoard</strong>
+    <label class="tool">Tool
+      <select id="tool">
+        <option value="pen">Pen</option>
+        <option value="line">Line</option>
+        <option value="rect">Rectangle</option>
+        <option value="ellipse">Ellipse</option>
+        <option value="eraser">Eraser</option>
+      </select>
+    </label>
+    <label class="tool">Color <input type="color" id="color" value="#1d3557"></label>
+    <label class="tool">Size <input type="range" id="size" min="1" max="30" value="4"></label>
+    <button id="undo" class="btn">Undo</button>
+    <button id="redo" class="btn">Redo</button>
+    <button id="export" class="btn">Save PNG</button>
+    <button id="clear" class="btn danger">Clear board</button>
+    <button id="copy" class="btn primary">Copy invite link</button>
+    <span id="status" class="status">Connecting…</span>
+    <div id="users" class="users" aria-label="People on this board"></div>
+  </header>
+  <main class="stage">
+    <div class="board" id="board">
+      <canvas id="canvas"></canvas>
+      <div id="cursors" class="cursors"></div>
+    </div>
+  </main>
+  <script src="/static/app.js"></script>
+</body>
+</html>
